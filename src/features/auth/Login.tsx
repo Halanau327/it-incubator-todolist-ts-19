@@ -5,7 +5,8 @@ import { Navigate } from "react-router-dom";
 import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, TextField } from "@mui/material";
 import { useAppDispatch } from "common/hooks";
 import { selectIsLoggedIn } from "features/auth/auth.selectors";
-import { authThunks } from "features/auth/auth.reducer";
+import { login } from "features/auth/auth.reducer";
+import { BaseResponse } from "../../common/types";
 
 export const Login = () => {
   const dispatch = useAppDispatch();
@@ -16,23 +17,29 @@ export const Login = () => {
     validate: (values) => {
       if (!values.email) {
         return {
-          email: "Email is required",
+          email: "Email is required"
         };
       }
       if (!values.password) {
         return {
-          password: "Password is required",
+          password: "Password is required"
         };
       }
     },
     initialValues: {
       email: "",
       password: "",
-      rememberMe: false,
+      rememberMe: false
     },
-    onSubmit: (values) => {
-      dispatch(authThunks.login(values));
-    },
+    onSubmit: (values, formikHelpers) => {
+      dispatch(login(values))
+        .unwrap()
+        .catch((err: BaseResponse) => {
+          err.fieldsErrors.forEach((el) => {
+            formikHelpers.setFieldError(el.field, el.error);
+          });
+        });
+    }
   });
 
   if (isLoggedIn) {
@@ -57,9 +64,9 @@ export const Login = () => {
             </FormLabel>
             <FormGroup>
               <TextField label="Email" margin="normal" {...formik.getFieldProps("email")} />
-              {formik.errors.email ? <div>{formik.errors.email}</div> : null}
+              {formik.errors.email ? <div style={{color: 'red'}}>{formik.errors.email}</div> : null}
               <TextField type="password" label="Password" margin="normal" {...formik.getFieldProps("password")} />
-              {formik.errors.password ? <div>{formik.errors.password}</div> : null}
+              {formik.errors.password ? <div style={{color: 'red'}}>{formik.errors.password}</div> : null}
               <FormControlLabel
                 label={"Remember me"}
                 control={<Checkbox {...formik.getFieldProps("rememberMe")} checked={formik.values.rememberMe} />}
