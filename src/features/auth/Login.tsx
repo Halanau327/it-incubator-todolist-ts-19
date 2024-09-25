@@ -35,9 +35,9 @@ export const Login = () => {
       dispatch(login(values))
         .unwrap()
         .catch((err: BaseResponse) => {
-          err.fieldsErrors.forEach((el) => {
-            formikHelpers.setFieldError(el.field, el.error);
-          });
+            err.fieldsErrors?.forEach((el) => {
+              formikHelpers.setFieldError(el.field, el.error);
+            });
         });
     }
   });
