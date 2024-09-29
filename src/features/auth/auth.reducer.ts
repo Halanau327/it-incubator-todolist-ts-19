@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import { appActions } from "app/app.reducer";
 import { authAPI, LoginParamsType } from "features/auth/auth.api";
 import { clearTasksAndTodolists } from "common/actions";
@@ -32,11 +32,10 @@ export const login = createAppAsyncThunk<{ isLoggedIn: boolean }, LoginParamsTyp
     try {
       dispatch(appActions.setAppStatus({ status: "loading" }));
       const res = await authAPI.login(arg);
-      if (res.data.resultCode === 0) {
+      if (res.data.resultCode === ResultCode.Success) {
         dispatch(appActions.setAppStatus({ status: "succeeded" }));
         return { isLoggedIn: true };
       } else {
-        console.log(res.data);
         const isShowAppError = !res.data.fieldsErrors.length
         handleServerAppError(res.data, dispatch, isShowAppError);
         return rejectWithValue(res.data);
@@ -55,7 +54,7 @@ export const logout = createAppAsyncThunk<{
   try {
     dispatch(appActions.setAppStatus({ status: "loading" }));
     const res = await authAPI.logout();
-    if (res.data.resultCode === 0) {
+    if (res.data.resultCode === ResultCode.Success) {
       dispatch(clearTasksAndTodolists());
       dispatch(appActions.setAppStatus({ status: "succeeded" }));
       return { isLoggedIn: false };
@@ -83,7 +82,7 @@ export const initializeApp = createAppAsyncThunk<{
     }
   }).finally(() => {
     dispatch(appActions.setAppInitialized({ isInitialized: true }));
-  })
+  });
 });
 
 export const authReducer = slice.reducer;
