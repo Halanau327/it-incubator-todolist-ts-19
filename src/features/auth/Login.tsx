@@ -13,18 +13,29 @@ export const Login = () => {
 
   const isLoggedIn = useSelector(selectIsLoggedIn);
 
+  type FormikErrorType = {
+    email?: string
+    password?: string
+    rememberMe?: boolean
+  }
+
   const formik = useFormik({
+
     validate: (values) => {
-      if (!values.email) {
-        return {
-          email: "Email is required"
-        };
+      const errors: FormikErrorType = {};
+      const regX = new RegExp(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i);
+      if (!values.email.trim()) {
+        errors.email = "Email is required";
+      } else if (!regX.test(values.email)) {
+        errors.email = "Incorrect email address";
       }
-      if (!values.password) {
-        return {
-          password: "Password is required"
-        };
+
+      if (!values.password.trim()) {
+        errors.password = "Requred";
+      } else if (values.password.length < 6) {
+        errors.password = "Must be than 6 symbols";
       }
+      return errors;
     },
     initialValues: {
       email: "",
@@ -35,9 +46,9 @@ export const Login = () => {
       dispatch(login(values))
         .unwrap()
         .catch((err: BaseResponse) => {
-            err.fieldsErrors?.forEach((el) => {
-              formikHelpers.setFieldError(el.field, el.error);
-            });
+          err.fieldsErrors?.forEach((el) => {
+            formikHelpers.setFieldError(el.field, el.error);
+          });
         });
     }
   });
@@ -64,9 +75,9 @@ export const Login = () => {
             </FormLabel>
             <FormGroup>
               <TextField label="Email" margin="normal" {...formik.getFieldProps("email")} />
-              {formik.errors.email ? <div style={{color: 'red'}}>{formik.errors.email}</div> : null}
+              {formik.touched.email && <div style={{color: 'red'}}>{formik.errors.email}</div>}
               <TextField type="password" label="Password" margin="normal" {...formik.getFieldProps("password")} />
-              {formik.errors.password ? <div style={{color: 'red'}}>{formik.errors.password}</div> : null}
+              {formik.touched.password && <div style={{color: 'red'}}>{formik.errors.password}</div>}
               <FormControlLabel
                 label={"Remember me"}
                 control={<Checkbox {...formik.getFieldProps("rememberMe")} checked={formik.values.rememberMe} />}
